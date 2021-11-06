@@ -1,13 +1,11 @@
+' emitter.bmx
 
-Strict
-
-'Import sidesign.minib3d
-Import "particle.bmx"
-'Import "particletype.bmx"
-
-Type Emitter
+Rem
+bbdoc: TParticleCandyEmitter
+EndRem
+Type TParticleCandyEmitter
   Field _active:Int
-  Field _piv:TEntity   ' PIVOT HANDLE
+  Field piv:TEntity   ' PIVOT HANDLE
   Field _est:Int       ' TIME EMISSION STARTED
   Field _pty:Int[11]   ' UP To 10 PARTICLE TYPES PER EMITTER  
   Field _pta:Int[11]  ' PARTICLE Type ENABLED? (True/False)
@@ -29,20 +27,20 @@ Type Emitter
   Field _dummyMesh:TMesh
   Field _dummySurface:TSurface
 
-  Method Create:Emitter( parent:TEntity = Null, scale:Float = 1.0, dummyPivot:TEntity = Null, dummyMesh:TMesh = Null, dummySurface:TSurface = Null )
-    Local n:Emitter = New Emitter
+  Method Create:TParticleCandyEmitter( parent:TEntity = Null, scale:Float = 1.0, dummyPivot:TEntity = Null, dummyMesh:TMesh = Null, dummySurface:TSurface = Null )
+    Local n:TParticleCandyEmitter = New TParticleCandyEmitter
 	  n._active       = False
     n._scl          = scale
     n._dummyPivot   = dummyPivot
     n._dummyMesh    = dummyMesh
     n._dummySurface = dummySurface
 
-    n._piv = CreateCube( parent )
-    Local marker:TEntity = CreateCube( n._piv )
+    n.piv = CreateCube( parent )
+    Local marker:TEntity = CreateCube( n.piv )
     ScaleEntity   ( marker, 1.0, 0.2, 1.0 )
     PositionEntity( marker, 0.0, 1.0, 0.0 )
     EntityColor   ( marker, 255, 0, 0 )
-    HideEntity    ( n._piv )
+    HideEntity    ( n.piv )
 
     n._particleList = New TList
 	 Return n
@@ -73,7 +71,7 @@ Type Emitter
   End Method
 
   Method start()
-	 DebugLog "starting..."
+	 If TParticleCandy.DEBUG = True Then DebugLog "starting..."
     _active = True
     _est    = MilliSecs()
     For Local i:Int = 1 To _npt
@@ -81,28 +79,28 @@ Type Emitter
     Next
     ' ALSO START ATTACHED SOUND?
     If( _snd )
-      'TODO If xChannelPlaying(Emitter.Sch) xStopChannel Emitter.Sch
-      'Emitter.Sch = xEmitSound(Emitter.Snd,Emitter.Piv)
+      'TODO If xChannelPlaying(TParticleCandyEmitter.Sch) xStopChannel TParticleCandyEmitter.Sch
+      'TParticleCandyEmitter.Sch = xEmitSound(TParticleCandyEmitter.Snd,TParticleCandyEmitter.Piv)
     End If
   End Method
 
   Method stop()
     _active = False
-    'TODO If xChannelPlaying(Emitter.Sch) xStopChannel Emitter.Sch
+    'TODO If xChannelPlaying(TParticleCandyEmitter.Sch) xStopChannel TParticleCandyEmitter.Sch
   End Method
 
 	Rem
   Method setSound:Void( sndFile:String, slp:Int = 0 )
     _slp = slp
-    'TODO Emitter.Snd  = xLoad3DSound(sndFile)
-    'If Emitter.Snd < 1 Then RuntimeError "COULD NOT LOAD SOUND: " + sndFile
-    'If Emitter.slp Then xLoopSound Emitter.Snd
+    'TODO TParticleCandyEmitter.Snd  = xLoad3DSound(sndFile)
+    'If TParticleCandyEmitter.Snd < 1 Then RuntimeError "COULD NOT LOAD SOUND: " + sndFile
+    'If TParticleCandyEmitter.slp Then xLoopSound TParticleCandyEmitter.Snd
   End Method
-  end rem
+  End Rem
 
   Method SetScale( scl:Float = 1.0 )
     _scl = scl
-    ScaleEntity( _piv, scl, scl, scl, True )
+    ScaleEntity( piv, scl, scl, scl, True )
   End Method
 
   Method GetScale:Float()
@@ -154,25 +152,24 @@ Type Emitter
   Method freeEmitter()
     stop()
 
-    For Local particle:Particle = EachIn _particleList
-      If( GetParent( _dummyPivot ) = particle._piv ) EntityParent( _dummyPivot, Null, False )
-      If( GetParent( _dummyMesh )  = particle._piv ) EntityParent( _dummyMesh , Null, False )
+    For Local particle:TParticleCandyParticle = EachIn _particleList
+      If( GetParent( _dummyPivot ) = particle.piv ) EntityParent( _dummyPivot, Null, False )
+      If( GetParent( _dummyMesh )  = particle.piv ) EntityParent( _dummyMesh , Null, False )
       _particleList.Remove( particle )
     Next
 
     _npt    = 0
     _active = False
-    'TODO If Emitter.Snd > 0 xFreeSound Emitter.Snd
-    FreeEntity( _piv )
+    'TODO If TParticleCandyEmitter.Snd > 0 xFreeSound TParticleCandyEmitter.Snd
+    FreeEntity( piv )
   End Method
 
   Method clearParticles()
-    For Local particle:Particle = EachIn _particleList
-      If( GetParent( _dummyPivot ) = particle._piv ) EntityParent( _dummyPivot, Null, False )
-      If( GetParent( _dummyMesh )  = particle._piv ) EntityParent( _dummyMesh , Null, False )
+    For Local particle:TParticleCandyParticle = EachIn _particleList
+      If( GetParent( _dummyPivot ) = particle.piv ) EntityParent( _dummyPivot, Null, False )
+      If( GetParent( _dummyMesh )  = particle.piv ) EntityParent( _dummyMesh , Null, False )
       _particleList.Remove( particle )
     Next
   End Method
 
 End Type
-

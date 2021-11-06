@@ -1,53 +1,51 @@
+' particlecandy.bmx
+
 ' This software is a port of Martin Liedel's (Xaron) Particle Candy for Monkey-X
 '
-' BlitzMax OpenB3DMax Port by RonTek
+' BlitzMax OpenB3D Port by RonTek
 ' https://www.blitzcoder.org 
 '
 ' ---------------------------------------------------------------------------------
 '
 ' This software is a port of Mike Dogan's great ParticleCandy for BlitzBasic3d
-'
 ' http://www.x-pressive.com
 '
 ' Check his page if you're interested in his latest ParticleCandy Engine
 ' for Corona SDK!
 '
 ' A BIG THANKS goes to him as he gave the permission to publish this as open source
-'
 ' For any support or questions contact: martin.leidel@gmail.com
-'
-' This software is provided 'as-is', without any express or implied
-' warranty.  In no event will the authors be held liable for any damages
-' arising from the use of this software.
-' 
-' Permission is granted to anyone to use this software for any purpose,
-' including commercial applications, and to alter it and redistribute it
-' freely, subject to the following restrictions:
-' 
-' 1. The origin of this software must not be misrepresented; you must not
-' claim that you wrote the original software. If you use this software
-' in a product, an acknowledgment in the product documentation would be
-' appreciated but is not required.
-' 2. Altered source versions must be plainly marked as such, and must not be
-' misrepresented as being the original software.
-' 3. This notice may not be removed or altered from any source distribution.
 
 Strict
 
-'Import sidesign.minib3d
-'Framework Openb3d.B3dglgraphics
-Import "emitter.bmx"
-'Import "particle.bmx"
-Import "particletype.bmx"
+Rem
+bbdoc: Particle Candy for Openb3d
+End Rem
+Module Openb3dext.Particlecandy
 
-Type ParticleCandy
+ModuleInfo "Version: 1.01"
+ModuleInfo "License: zlib"
+ModuleInfo "Copyright: - 200?-2021 Mike Dogan"
+
+Import Openb3d.Openb3d
+
+Include "particle.bmx"
+Include "emitter.bmx"
+Include "particletype.bmx"
+
+Rem
+bbdoc: TParticleCandy
+EndRem
+Type TParticleCandy
+  Global DEBUG:Int  = False
+
   Field _gravity:Float
   Field _numParticleTypes:Int
   Field _maxNumParticleTypes:Int
   Field _useTriangles
   Field _entityFX:Int
   Field _emitterList:TList
-  Field _particleTypes:ParticleType[]
+  Field _particleTypes:TParticleCandyParticleType[]
   Field _particleTypeList:TList
   Field _numParticles:Int
   Field _particlesRendered:Int
@@ -75,22 +73,22 @@ Type ParticleCandy
   Field _now:Int  = MilliSecs()
   Field _diff:Float       ' MILLISEC-DIFFERENCE BETWEEN LAST TWO FRAMES
 
-  Method Create:ParticleCandy( gravity:Float = 0.01, numParticleTypes:Int = 100, useTriangles = False, EntityFX:Int = 1+2+8+16+32 )
-	 Local pc:ParticleCandy = New ParticleCandy
+  Method Create:TParticleCandy( gravity:Float = 0.01, numParticleTypes:Int = 100, useTriangles = False, EntityFX:Int = 1+2+8+16+32 )
+	 Local pc:TParticleCandy = New TParticleCandy
 	 pc._gravity = gravity
     pc._maxNumParticleTypes = numParticleTypes
     pc._numParticleTypes = 0
     pc._useTriangles = useTriangles
     pc._entityFX = EntityFX
     pc._emitterList = New TList
-    pc._particleTypes = New ParticleType[numParticleTypes]
+    pc._particleTypes = New TParticleCandyParticleType[numParticleTypes]
     pc._particleTypeList = New TList
-	 DebugLog "Creating Particle..."
+	 If TParticleCandy.DEBUG = True Then DebugLog "Creating Particle..."
 	 Return pc
   End Method
   
-  Method init( cam:TCamera , texFile:String , texFrames:Int , viewportW:Int = 0 , viewportH:Int = 0 )
-	  DebugLog "Init..."
+  Method Init( cam:TCamera , texFile:String , texFrames:Int , viewportW:Int = 0 , viewportH:Int = 0 )
+	  If TParticleCandy.DEBUG = True Then DebugLog "Init..."
     _camera = cam
     _screenW = viewportW
     _screenH = viewportH
@@ -116,7 +114,7 @@ Type ParticleCandy
     AddVertex ( _dummySurface,  1.0,  1.0, 0.0, 1.0, 0.0 )
     AddVertex ( _dummySurface, -1.0, -1.0, 0.0, 0.0, 1.0 )
     If( Not _useTriangles ) AddVertex( _dummySurface, 1.0, -1.0, 0.0, 1.0, 1.0 )
-    DebugLog texFile
+    If TParticleCandy.DEBUG = True Then DebugLog texFile
     loadParticleTexture( texFile, texFrames )
   End Method
   
@@ -147,60 +145,60 @@ Type ParticleCandy
     _wind = i / 1000.0
   End Method
 
-  Method CreateEmitter:Emitter( parent:TEntity = Null, scale:Float = 1.0 )
+  Method CreateEmitter:TParticleCandyEmitter( parent:TEntity = Null, scale:Float = 1.0 )
     ' CAMERA SET?
     If( Not _camera ) RuntimeError "YOU DID NOT SET A REFERENCE TO YOUR CAMERA. USE InitParticles(...) FIRST !"
     ' TEXTURE LOADED?
     If( Not _particleTexture ) RuntimeError "YOU DID NOT SET A PARTICLE TEXTURE. USE InitParticles(...) FIRST !"
     
-    Local emitter:Emitter = New Emitter.Create( parent, scale, _dummyPivot, _dummyMesh, _dummySurface )
+    Local emitter:TParticleCandyEmitter = New TParticleCandyEmitter.Create( parent, scale, _dummyPivot, _dummyMesh, _dummySurface )
     _emitterList.AddLast( emitter )
     Return emitter
   End Method
 
   Method stopEmitters()
-    For Local emitter:Emitter = EachIn _emitterList
+    For Local emitter:TParticleCandyEmitter = EachIn _emitterList
       emitter._active = False
-      'TODO If xChannelPlaying(Emitter.Sch) xStopChannel Emitter.Sch
+      'TODO If xChannelPlaying(TParticleCandyEmitter.Sch) xStopChannel TParticleCandyEmitter.Sch
     Next
   End Method
 
-  Method freeEmitter( emitter:Emitter )
+  Method freeEmitter( emitter:TParticleCandyEmitter )
     emitter.freeEmitter()
     _emitterList.Remove( emitter )
   End Method
 
   Method freeEmitters()
-    For Local emitter:Emitter = EachIn _emitterList
+    For Local emitter:TParticleCandyEmitter = EachIn _emitterList
       freeEmitter( emitter )
     Next
   End Method
 
   Method clearParticles()
     stopEmitters()
-    For Local emitter:Emitter = EachIn _emitterList
+    For Local emitter:TParticleCandyEmitter = EachIn _emitterList
       emitter.clearParticles()
     Next
-	 DebugLog "clearing..."
+	 If TParticleCandy.DEBUG = True Then DebugLog "clearing..."
   End Method
 
-  Method free()
-'    clearParticles()
-'    freeEmitters  ()
-'    For Local ParticleType:TParticleType = EachIn ParticleTypeList
-'        ParticleTypeList.Remove( ParticleType )
-'    Next
-'    _numParticleTypes = 0 
-'    FreeTexture( _particleTexture )
-'    FreeEntity  PTDummy
-'    FreeEntity  PTDummyPiv
-'    FreeEntity  PTMesh[0]
-'    FreeEntity  PTMesh[1]
-'    PTTex     = Null
-'    PTMesh[0] = Null
-'    PTMesh[1] = Null
-'    PTDummy   = Null
-'    PTDummyPiv= Null
+  Method Free()
+    clearParticles()
+    freeEmitters  ()
+    For Local pt:TParticleCandyParticleType = EachIn _particleTypeList
+        _particleTypeList.Remove( pt )
+    Next
+    _numParticleTypes = 0 
+    FreeTexture( _particleTexture )
+    FreeEntity  _dummyMesh
+    FreeEntity  _dummyPivot
+    FreeEntity  _mesh[0]
+    FreeEntity  _mesh[1]
+    _particleTexture = Null
+    _mesh[0] = Null
+    _mesh[1] = Null
+    _dummyMesh   = Null
+    _dummyPivot= Null
   End Method
 
   Method createParticleType:Int()
@@ -210,7 +208,7 @@ Type ParticleCandy
     
     Local id:Int = _numParticleTypes
     
-    _particleTypes[id] = New ParticleType
+    _particleTypes[id] = New TParticleCandyParticleType
     
     ' SET Default VALUES WHEN CREATED
     setPTImage( id )
@@ -392,7 +390,7 @@ Type ParticleCandy
     
     Local id:Int = _numParticleTypes
     
-    _particleTypes[id] = New ParticleType
+    _particleTypes[id] = New TParticleCandyParticleType
     
     ' COPY VALUES FROM SOURCE Type
     _particleTypes[id]._u   = _particleTypes[id2]._u
@@ -467,15 +465,15 @@ Type ParticleCandy
     _surface[0].ClearSurface()
     _surface[1].ClearSurface()
 
-    For Local emitter:Emitter = EachIn _emitterList
+    For Local emitter:TParticleCandyEmitter = EachIn _emitterList
       ' EMITTER ACTIVE?
       If( emitter._active )
-        Local x:Float  = EntityX    ( emitter._piv, True )
-        Local y:Float  = EntityY    ( emitter._piv, True )
-        Local z:Float  = EntityZ    ( emitter._piv, True )
-        Local xr:Float = EntityPitch( emitter._piv, True )
-        Local yr:Float = EntityYaw  ( emitter._piv, True )
-        Local zr:Float = EntityRoll ( emitter._piv, True )
+        Local x:Float  = EntityX    ( emitter.piv, True )
+        Local y:Float  = EntityY    ( emitter.piv, True )
+        Local z:Float  = EntityZ    ( emitter.piv, True )
+        Local xr:Float = EntityPitch( emitter.piv, True )
+        Local yr:Float = EntityYaw  ( emitter.piv, True )
+        Local zr:Float = EntityRoll ( emitter.piv, True )
         
         ' LOOP THROUGH EMITTER'S PARTICLE TYPES
         For Local i:Int = 1 To emitter._npt
@@ -486,7 +484,7 @@ Type ParticleCandy
           ' EMITTER FINISHED?
           If( _now - emitter._est > emitter._mlt )
             emitter._active = False
-            'TODO If Emitter.slp And xChannelPlaying(Emitter.Sch) xStopChannel Emitter.Sch
+            'TODO If TParticleCandyEmitter.slp And xChannelPlaying(TParticleCandyEmitter.Sch) xStopChannel TParticleCandyEmitter.Sch
 
             ' EMIT THIS PARTICLE Type?
           Else If( _now - emitter._est > emitter._pst[i] And _now - emitter._est < emitter._plt[i] And emitter._pta[i] = True )
@@ -494,39 +492,39 @@ Type ParticleCandy
             emitter._pea[i] = emitter._pea[i] + _diff * emitter._per[i]
             While emitter._pea[i] > 1.0
 
-              Local particle:Particle = New Particle
+              Local particle:TParticleCandyParticle = New TParticleCandyParticle
               particle._typ = typ
-              particle._piv = emitter._piv
+              particle.piv = emitter.piv
 
               ' PARTICLE ANGLE
-              RotateEntity  ( emitter._piv, xr, yr, zr, True )
-              PositionEntity( emitter._piv, x, y, z, True )
+              RotateEntity  ( emitter.piv, xr, yr, zr, True )
+              PositionEntity( emitter.piv, x, y, z, True )
               ' START POSITION
               If( _particleTypes[typ]._esh = 0 )
                 ' EMISSION SHAPE AREA
-                TurnEntity( emitter._piv, Rnd( ian, emr ), Rnd( 0, 359 ), Rnd( ian, emr ), False )
-                MoveEntity( emitter._piv, ( _particleTypes[typ]._ox1 + Rnd( 0, _particleTypes[typ]._ox2 ) ) * emitter._scl, ( _particleTypes[typ]._oy1 + Rnd( 0, _particleTypes[typ]._oy2 ) ) * emitter._scl, ( _particleTypes[typ]._oz1 + Rnd( 0, _particleTypes[typ]._oz2) ) * emitter._scl )
+                TurnEntity( emitter.piv, Rnd( ian, emr ), Rnd( 0, 359 ), Rnd( ian, emr ), False )
+                MoveEntity( emitter.piv, ( _particleTypes[typ]._ox1 + Rnd( 0, _particleTypes[typ]._ox2 ) ) * emitter._scl, ( _particleTypes[typ]._oy1 + Rnd( 0, _particleTypes[typ]._oy2 ) ) * emitter._scl, ( _particleTypes[typ]._oz1 + Rnd( 0, _particleTypes[typ]._oz2) ) * emitter._scl )
               Else If( _particleTypes[typ]._esh = 1 )
                 ' EMISSION SHAPE POINT  
-                TurnEntity( emitter._piv, Rnd( ian, emr ), Rnd( 0, 359 ), Rnd( ian, emr ), False )
+                TurnEntity( emitter.piv, Rnd( ian, emr ), Rnd( 0, 359 ), Rnd( ian, emr ), False )
               Else If( _particleTypes[typ]._esh = 2 )
                 ' EMISSION SHAPE RING
-                TurnEntity( emitter._piv, Rnd( ian, emr ), Rnd( 0, 359 ), Rnd( ian, emr ), False )
-                MoveEntity( emitter._piv, ( _particleTypes[typ]._ox1 + _particleTypes[typ]._ox2) * emitter._scl, ( _particleTypes[typ]._oy1 + Rnd( 0, _particleTypes[typ]._oy2 ) ) * emitter._scl, ( _particleTypes[typ]._oz1 + _particleTypes[typ]._oz2 ) * emitter._scl )
+                TurnEntity( emitter.piv, Rnd( ian, emr ), Rnd( 0, 359 ), Rnd( ian, emr ), False )
+                MoveEntity( emitter.piv, ( _particleTypes[typ]._ox1 + _particleTypes[typ]._ox2) * emitter._scl, ( _particleTypes[typ]._oy1 + Rnd( 0, _particleTypes[typ]._oy2 ) ) * emitter._scl, ( _particleTypes[typ]._oz1 + _particleTypes[typ]._oz2 ) * emitter._scl )
               Else If( _particleTypes[typ]._esh = 3 )
                 ' EMISSION SHAPE xLine
-                MoveEntity( emitter._piv, ( _particleTypes[typ]._ox1 + Rnd( 0, _particleTypes[typ]._ox2 ) ) * emitter._scl, ( _particleTypes[typ]._oy1 + Rnd( 0, _particleTypes[typ]._oy2 ) ) * emitter._scl, ( _particleTypes[typ]._oz1 + Rnd( 0, _particleTypes[typ]._oz2 ) ) * emitter._scl )
+                MoveEntity( emitter.piv, ( _particleTypes[typ]._ox1 + Rnd( 0, _particleTypes[typ]._ox2 ) ) * emitter._scl, ( _particleTypes[typ]._oy1 + Rnd( 0, _particleTypes[typ]._oy2 ) ) * emitter._scl, ( _particleTypes[typ]._oz1 + Rnd( 0, _particleTypes[typ]._oz2 ) ) * emitter._scl )
               End If
               
-              particle._x  = EntityX( emitter._piv, True )
-              particle._y  = EntityY( emitter._piv, True )
-              particle._z  = EntityZ( emitter._piv, True )
+              particle._x  = EntityX( emitter.piv, True )
+              particle._y  = EntityY( emitter.piv, True )
+              particle._z  = EntityZ( emitter.piv, True )
               particle._lx = x
               particle._ly = y
               particle._lz = z
 
               ' SET SPEED
-              TFormVector( 0,( _particleTypes[typ]._spd + Rnd( -spv, spv ) ) * emitter._scl, 0, emitter._piv, Null )
+              TFormVector( 0,( _particleTypes[typ]._spd + Rnd( -spv, spv ) ) * emitter._scl, 0, emitter.piv, Null )
               particle._vx = TFormedX()
               particle._vy = TFormedY()
               particle._vz = TFormedZ()
@@ -560,13 +558,13 @@ Type ParticleCandy
         Next
         
         ' RESTORE EMITTER'S POSITION
-        RotateEntity  ( emitter._piv, xr, yr, zr, True )
-        PositionEntity( emitter._piv, x, y, z, True )
+        RotateEntity  ( emitter.piv, xr, yr, zr, True )
+        PositionEntity( emitter.piv, x, y, z, True )
         
       End If
 
       ' UPDATE ALL PARTICLES
-      For Local particle:Particle = EachIn emitter._particleList
+      For Local particle:TParticleCandyParticle = EachIn emitter._particleList
     
         ' COUNT  PARTICLE
         _numParticles = _numParticles + 1
@@ -619,7 +617,7 @@ Type ParticleCandy
             particle._tea = particle._tea + _diff * _particleTypes[typ]._ter
             While particle._tea > 1.0
               typ2 = _particleTypes[typ]._trl
-              Local trail:Particle = New Particle
+              Local trail:TParticleCandyParticle = New TParticleCandyParticle
               trail._typ = typ2
               trail._x   = particle._x
               trail._y   = particle._y
@@ -641,7 +639,7 @@ Type ParticleCandy
             
     	' CIRCULAR MOTION
         If( _particleTypes[particle._typ]._cms <> 0.0 )
-          EntityParent( _dummyPivot, particle._piv, False )
+          EntityParent( _dummyPivot, particle.piv, False )
           PositionEntity( _dummyMesh, particle._x, particle._y, particle._z, True )
           EntityParent( _dummyMesh, _dummyPivot, True )
           TurnEntity( _dummyPivot, 0, _particleTypes[particle._typ]._cms * _diff, 0.0 )
@@ -652,16 +650,16 @@ Type ParticleCandy
         
         ' Delete PARTICLE?
         If( _now - _particleTypes[typ]._lft > particle._stt )
-          If( GetParent( _dummyPivot ) = particle._piv ) EntityParent( _dummyPivot, Null, False )
+          If( GetParent( _dummyPivot ) = particle.piv ) EntityParent( _dummyPivot, Null, False )
           emitter._particleList.Remove( particle )
         Else If( particle._sze < 0 )
-          If( GetParent( _dummyPivot ) = particle._piv ) EntityParent( _dummyPivot, Null, False )
+          If( GetParent( _dummyPivot ) = particle.piv ) EntityParent( _dummyPivot, Null, False )
           emitter._particleList.Remove( particle )
         Else If( particle._alp < 0 )
-          If( GetParent( _dummyPivot ) = particle._piv ) EntityParent( _dummyPivot, Null, False )
+          If( GetParent( _dummyPivot ) = particle.piv ) EntityParent( _dummyPivot, Null, False )
           emitter._particleList.Remove( particle )
         Else If( particle._bnc > _particleTypes[typ]._bnm )
-          If( GetParent( _dummyPivot ) = particle._piv ) EntityParent( _dummyPivot, Null, False )
+          If( GetParent( _dummyPivot ) = particle.piv ) EntityParent( _dummyPivot, Null, False )
           emitter._particleList.Remove( particle )
         'Else If  Particle.r + Particle.g + Particle.b < 1 ' <-- Delete If PARTICLE xColor BECOMES BLACK
         'Delete Particle
@@ -690,7 +688,7 @@ Type ParticleCandy
     Return False
   End Method
 
-  Method draw( particle:Particle )
+  Method draw( particle:TParticleCandyParticle )
     Local sz:Float, x:Float, y:Float, z:Float, u1:Float, u2:Float, v1:Float, v2:Float, r:Int, g:Int, b:Int, v:Int, rom:Int
     x   = particle._x
     y   = particle._y

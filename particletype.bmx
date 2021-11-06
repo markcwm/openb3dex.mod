@@ -1,6 +1,9 @@
-Strict
+' particletype.bmx
 
-Type ParticleType
+Rem
+bbdoc: TParticleCandyParticleType
+EndRem
+Type TParticleCandyParticleType
   Field _u:Float, _v:Float  ' PARTICLE TEXTURE COORDS
   Field _spd:Float          ' SPEED
   Field _spv:Float          ' SPEED VARIATION
