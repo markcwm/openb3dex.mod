@@ -18,15 +18,17 @@ ModuleInfo "License: zlib (You are free to use this code as you please)"
 ModuleInfo "Copyright: 2007 Logan Chittenden"
 
 ModuleInfo "History: 1.3 Release (by markcwm)"
-ModuleInfo "History: Init3DSound HearingPoint fix, updated documentation"
+ModuleInfo "History: Init3DSound HearingPoint fix, updated documentation."
 ModuleInfo "History: 1.2 Release"
+ModuleInfo "History: Added more control features, minor speed optimizations, restructuring, documentation."
 ModuleInfo "History: Added Stop3DSound, EntityStop3DSound, Pause3DSound, EntityPause3DSound,"
 ModuleInfo "History: Resume3DSound, EntityResume3DSound, fixed some memory bugs, removed redundant lines,"
-ModuleInfo "History: minor speed optimizations, internal restructuring, updated documentation"
 ModuleInfo "History: 1.1 Release"
+ModuleInfo "History: Added advanced sound control features."
 ModuleInfo "History: Added DopplerFrameSkip, Que3DSound, UPDATE_DISABLED option, List3DSounds,"
-ModuleInfo "History: SoundPoint playing, fixed unnecessarily confusing dopper effect"
-ModuleInfo "History: 1.0 Initial Release"
+ModuleInfo "History: SoundPoint playing, fixed unnecessarily confusing dopper effect."
+ModuleInfo "History: 1.0 First Release"
+ModuleInfo "History: 4/10/2007 (expect bugs!)"
 
 Import Openb3d.Openb3d
 Import Brl.OpenAlAudio
