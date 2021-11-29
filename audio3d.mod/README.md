@@ -23,5 +23,3 @@ I would love to add in a world sound system that would handle how objects intera
 ## License
 See zlib.txt
 
-![screenshot](./media/audio3d.png)
-

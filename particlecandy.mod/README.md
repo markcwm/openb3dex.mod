@@ -13,4 +13,3 @@ See zlib.txt
 * Blitz3D to Monkey-X port by Xaron
 * Monkey-X to BlitzMax port by RonTek
 
-![screenshot](./media/particlecandy.png)
