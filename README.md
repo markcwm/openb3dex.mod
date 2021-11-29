@@ -1,5 +1,5 @@
 # OpenB3DMax modules
-Extra Blitzmax modules for OpenB3D, see openb3d.docs for examples
+Extra Blitzmax modules for OpenB3D, see modules for examples
 
 ## Audio3D module
 3D positional sound module using Brl.Audio, like Blitz3D but sounds can also be qued, stopped, paused and resumed per entity.
