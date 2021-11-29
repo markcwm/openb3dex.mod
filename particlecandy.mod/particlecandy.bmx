@@ -21,11 +21,11 @@ Strict
 Rem
 bbdoc: Particle Candy for Openb3d
 End Rem
-Module Openb3dext.Particlecandy
+Module Openb3dmax.Particlecandy
 
 ModuleInfo "Version: 1.01"
 ModuleInfo "License: zlib"
-ModuleInfo "Copyright: - 200?-2021 Mike Dogan"
+ModuleInfo "Copyright: - 2007-2021 Mike Dogan"
 
 Import Openb3d.Openb3d
 
