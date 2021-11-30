@@ -3,7 +3,7 @@
 Strict
 
 Framework Openb3d.B3dglgraphics
-Import Openb3dmax.Particlecandy
+Import Openb3dex.Particlecandy
 
 ?Not bmxng
 Import Brl.Random

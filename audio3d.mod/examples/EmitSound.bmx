@@ -3,7 +3,7 @@
 SuperStrict
 
 Framework Openb3d.B3dglgraphics
-Import Openb3dmax.Audio3d
+Import Openb3dex.Audio3d
 
 Local Drives:String[] = AudioDrivers()
 For Local Drive:String = EachIn Drives
